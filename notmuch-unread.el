@@ -63,14 +63,16 @@
        (cancel-timer notmuch-unread-update-timer))
   (if notmuch-unread-mode
       (progn
-       (add-to-list 'global-mode-string
-                    'notmuch-unread-mode-line-string t)
-       (setq notmuch-unread-update-timer
-             (run-at-time nil notmuch-unread-update-interval
-                          'notmuch-unread-update-handler)))
-    (setq global-mode-string
-          (delq 'notmuch-unread-mode-line-string
-                global-mode-string))))
+        (add-to-list 'mode-line-misc-info
+                     '(notmuch-unread-mode-line-string
+                       (" " notmuch-unread-mode-line-string " ")) t)
+        (setq notmuch-unread-update-timer
+              (run-at-time nil notmuch-unread-update-interval
+                           'notmuch-unread-update-handler)))
+    (setq mode-line-misc-info
+          (delq '(notmuch-unread-mode-line-string
+                  (" " notmuch-unread-mode-line-string " "))
+                mode-line-misc-info))))
 
 (provide 'notmuch-unread)
 ;;; notmuch-unread.el ends here

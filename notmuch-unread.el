@@ -24,6 +24,8 @@
 
 ;;; Code:
 
+(require 'notmuch)
+
 (defvar notmuch-unread-mode-line-string nil
   "String to display in the mode line.")
 

@@ -43,6 +43,11 @@
   :type 'string
   :group 'notmuch-unread)
 
+(defcustom notmuch-unread-icon-color-unread "#98d32f"
+  "Color for unread mail"
+  :type 'color
+  :group 'notmuch-unread)
+
 (defun notmuch-unread-count ()
   "Return the number of messages that match
 `notmuch-unread-search-term`."
@@ -51,10 +56,33 @@
     "\n" ""
     (notmuch-command-to-string "count" notmuch-unread-search-term))))
 
+(defvar notmuch-unread-keymap
+    (let ((map (make-sparse-keymap)))
+      (define-key map [mode-line mouse-1]
+        (lambda ()
+            (interactive)
+            (notmuch-search notmuch-unread-search-term)))
+      (define-key map [mode-line mouse-3]
+        (lambda ()
+            (interactive)
+            (notmuch)))
+      map)
+   "Keymap to enable notmuch-search unread on click")
+
 (defun notmuch-unread-update-handler ()
   "Update the mode line."
-  (setq notmuch-unread-mode-line-string
-        (format " [✉ %d]" (notmuch-unread-count)))
+  (let* ((ct (notmuch-unread-count)))
+    (setq notmuch-unread-mode-line-string
+          (propertize (format "✉:%d" (notmuch-unread-count))
+                    'face `(:foreground ,notmuch-unread-icon-color-unread)
+                    'mouse-face `(:foreground ,notmuch-unread-icon-color-unread
+                                  :box (:line-width 1 :style released-button
+                                        :color "grey75") )
+                    'help-echo (format "%d unread. Mouse-1 to show unread. Mouse-3 to open notmuch" ct)
+                    'keymap notmuch-unread-keymap))
+    (when (= ct 0)
+      (remove-text-properties 0 (length notmuch-unread-mode-line-string)
+                              '(face nil) notmuch-unread-mode-line-string)))
   (force-mode-line-update))
 
 ;;;###autoload

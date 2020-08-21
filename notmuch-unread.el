@@ -52,8 +52,10 @@
 
 (defun notmuch-unread-update-handler ()
   "Update the mode line."
-  (setq notmuch-unread-mode-line-string
-        (format " [✉ %d]" (notmuch-unread-count)))
+  (let ((unread (notmuch-unread-count)))
+    (if (not (equal unread 0))
+        (setq notmuch-unread-mode-line-string (format "[✉ %d]" unread))
+      (setq notmuch-unread-mode-line-string "")))
   (force-mode-line-update))
 
 ;;;###autoload

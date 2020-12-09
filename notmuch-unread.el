@@ -72,17 +72,16 @@
 (defun notmuch-unread-update-handler ()
   "Update the mode line."
   (let* ((ct (notmuch-unread-count)))
-    (setq notmuch-unread-mode-line-string
-          (propertize (format "✉:%d" (notmuch-unread-count))
-                    'face `(:foreground ,notmuch-unread-icon-color-unread)
-                    'mouse-face `(:foreground ,notmuch-unread-icon-color-unread
-                                  :box (:line-width 1 :style released-button
-                                        :color "grey75") )
-                    'help-echo (format "%d unread. Mouse-1 to show unread. Mouse-3 to open notmuch" ct)
-                    'keymap notmuch-unread-keymap))
-    (when (= ct 0)
-      (remove-text-properties 0 (length notmuch-unread-mode-line-string)
-                              '(face nil) notmuch-unread-mode-line-string)))
+     (if (not (equal ct 0))
+         (setq notmuch-unread-mode-line-string
+               (propertize (format " ✉:%d " (notmuch-unread-count))
+                           'face `(:foreground ,notmuch-unread-icon-color-unread)
+                           'mouse-face `(:foreground ,notmuch-unread-icon-color-unread
+                                                     :box (:line-width 1 :style released-button
+                                                                       :color "grey75") )
+                           'help-echo (format "%d unread. Mouse-1 to show unread. Mouse-3 to open notmuch" ct)
+                           'keymap notmuch-unread-keymap))
+       (setq notmuch-unread-mode-line-string "")))
   (force-mode-line-update))
 
 ;;;###autoload

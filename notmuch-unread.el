@@ -43,11 +43,6 @@
   :type 'string
   :group 'notmuch-unread)
 
-(defcustom notmuch-unread-icon-color-unread "#98d32f"
-  "Color for unread mail"
-  :type 'color
-  :group 'notmuch-unread)
-
 (defun notmuch-unread-count ()
   "Return the number of messages that match
 `notmuch-unread-search-term`."
@@ -74,11 +69,9 @@
   (let* ((ct (notmuch-unread-count)))
      (if (not (equal ct 0))
          (setq notmuch-unread-mode-line-string
-               (propertize (format " ✉:%d " (notmuch-unread-count))
-                           'face `(:foreground ,notmuch-unread-icon-color-unread)
-                           'mouse-face `(:foreground ,notmuch-unread-icon-color-unread
-                                                     :box (:line-width 1 :style released-button
-                                                                       :color "grey75") )
+               (propertize (format "[#%d]" (notmuch-unread-count))
+                           'mouse-face `(:box (:line-width 1 :style released-button
+                                                           :color "grey75"))
                            'help-echo (format "%d unread. Mouse-1 to show unread. Mouse-3 to open notmuch" ct)
                            'keymap notmuch-unread-keymap))
        (setq notmuch-unread-mode-line-string "")))

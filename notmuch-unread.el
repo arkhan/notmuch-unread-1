@@ -25,6 +25,7 @@
 ;;; Code:
 
 (require 'notmuch)
+(require 'notmuch-lib)
 
 (defvar notmuch-unread-mode-line-string nil
   "String to display in the mode line.")
@@ -54,7 +55,7 @@
   "Update the mode line."
   (let ((unread (notmuch-unread-count)))
     (if (not (equal unread 0))
-        (setq notmuch-unread-mode-line-string (format "[✉ %d]" unread))
+        (setq notmuch-unread-mode-line-string (format "[# %d]" unread))
       (setq notmuch-unread-mode-line-string "")))
   (force-mode-line-update))
 

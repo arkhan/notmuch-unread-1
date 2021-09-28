@@ -2,6 +2,7 @@
 ;;; Package-Requires: ((notmuch "0.18"))
 ;;; Version: 0.1
 
+;; Copyright (C) 2015  Tyler Earnest <tmearnest@gmail.com>
 ;; Copyright (C) 2014  David Thompson <davet@gnu.org>
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -30,6 +31,8 @@
 (defvar notmuch-unread-mode-line-string nil
   "String to display in the mode line.")
 
+(put 'notmuch-unread-mode-line-string 'risky-local-variable t)
+
 (defvar notmuch-unread-update-timer nil
   "Timer for updating the mode line.")
 
@@ -51,12 +54,30 @@
     "\n" ""
     (notmuch-command-to-string "count" notmuch-unread-search-term))))
 
+(defvar notmuch-unread-keymap
+    (let ((map (make-sparse-keymap)))
+      (define-key map [mode-line mouse-1]
+        (lambda ()
+            (interactive)
+            (notmuch-search notmuch-unread-search-term)))
+      (define-key map [mode-line mouse-3]
+        (lambda ()
+            (interactive)
+            (notmuch)))
+      map)
+   "Keymap to enable notmuch-search unread on click")
+
 (defun notmuch-unread-update-handler ()
   "Update the mode line."
-  (let ((unread (notmuch-unread-count)))
-    (if (not (equal unread 0))
-        (setq notmuch-unread-mode-line-string (format "[# %d]" unread))
-      (setq notmuch-unread-mode-line-string "")))
+  (let* ((ct (notmuch-unread-count)))
+     (if (not (equal ct 0))
+         (setq notmuch-unread-mode-line-string
+               (propertize (format "[#%d]" (notmuch-unread-count))
+                           'mouse-face `(:box (:line-width 1 :style released-button
+                                                           :color "grey75"))
+                           'help-echo (format "%d unread. Mouse-1 to show unread. Mouse-3 to open notmuch" ct)
+                           'keymap notmuch-unread-keymap))
+       (setq notmuch-unread-mode-line-string "")))
   (force-mode-line-update))
 
 ;;;###autoload
@@ -68,16 +89,14 @@
        (cancel-timer notmuch-unread-update-timer))
   (if notmuch-unread-mode
       (progn
-        (add-to-list 'mode-line-misc-info
-                     '(notmuch-unread-mode-line-string
-                       (" " notmuch-unread-mode-line-string " ")) t)
-        (setq notmuch-unread-update-timer
-              (run-at-time nil notmuch-unread-update-interval
-                           'notmuch-unread-update-handler)))
-    (setq mode-line-misc-info
-          (delq '(notmuch-unread-mode-line-string
-                  (" " notmuch-unread-mode-line-string " "))
-                mode-line-misc-info))))
+       (setq global-mode-string (append (or global-mode-string '(""))
+                                           '(notmuch-unread-mode-line-string)))
+       (setq notmuch-unread-update-timer
+             (run-at-time nil notmuch-unread-update-interval
+                          'notmuch-unread-update-handler)))
+    (setq global-mode-string
+          (delq 'notmuch-unread-mode-line-string
+                global-mode-string))))
 
 (provide 'notmuch-unread)
 ;;; notmuch-unread.el ends here
